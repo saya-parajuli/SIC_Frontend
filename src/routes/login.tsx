@@ -39,7 +39,7 @@ function LoginPage() {
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="alice@demo.io" />
+          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="samsung@gmail.com" />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -52,7 +52,7 @@ function LoginPage() {
           {loading ? "Signing in..." : "Sign in"}
         </Button>
         <p className="text-center text-xs text-muted-foreground">
-          Try <code>alice@demo.io / alice123</code> or <code>admin@demo.io / admin123</code>
+          Try <code>samsung@gmail.com / sic123</code> or <code>admin@demo.io / admin123</code>
         </p>
       </form>
     </AuthShell>

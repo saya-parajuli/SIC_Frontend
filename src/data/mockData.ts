@@ -14,7 +14,7 @@ export interface MockUser {
 }
 
 export const mockUsers: MockUser[] = [
-  { id: "u1", name: "Alice Smith",   email: "alice@demo.io",  password: "alice123",  role: "user",  meterId: "SM-1001", joined: "2024-11-02" },
+  { id: "u1", name: "Samsung SIC",   email: "samsung@gmail.com",  password: "sic123",  role: "user",  meterId: "SM-1001", joined: "2024-11-02" },
   { id: "u2", name: "Bob Johnson",   email: "bob@demo.io",    password: "bob12345",  role: "user",  meterId: "SM-1002", joined: "2025-01-15" },
   { id: "u3", name: "Carol Davis",   email: "carol@demo.io",  password: "carol123",  role: "user",  meterId: "SM-1003", joined: "2025-02-20" },
   { id: "u4", name: "David Lee",     email: "david@demo.io",  password: "david123",  role: "user",  meterId: "SM-1004", joined: "2025-03-08" },

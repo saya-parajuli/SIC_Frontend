@@ -33,8 +33,8 @@ function HomePage() {
     <SiteLayout>
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs">
-          <Zap className="h-3 w-3 text-primary" /> Phase 5 demo build
-        </div>
+          <Zap className="h-3 w-3 text-primary" /> SIC project
+          </div>
         <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight md:text-6xl">
           Forecast. Optimize. <span className="text-primary">Save.</span>
         </h1>
@@ -48,7 +48,7 @@ function HomePage() {
 
         <div className="mx-auto mt-10 max-w-md rounded-lg border bg-muted/30 p-4 text-left text-xs">
           <div className="mb-1 font-semibold">Demo accounts</div>
-          <div>User: <code>alice@demo.io</code> / <code>alice123</code></div>
+          <div>User: <code>samsung@gmail.com</code> / <code>sic123</code></div>
           <div>Admin: <code>admin@demo.io</code> / <code>admin123</code></div>
         </div>
       </section>
