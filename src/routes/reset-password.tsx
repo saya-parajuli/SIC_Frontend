@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { MOCK_OTP, verifyOtp } from "@/lib/auth";
+// import { MOCK_OTP, verifyOtp } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/reset-password")({
@@ -21,7 +21,7 @@ function ResetPage() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      verifyOtp(code);
+      // verifyOtp(code);
       toast.success("Password updated. Please login.");
       navigate({ to: "/login" });
     } catch (err: any) {
@@ -30,7 +30,7 @@ function ResetPage() {
   };
 
   return (
-    <AuthShell title="Reset password" subtitle={`Enter the code (demo: ${MOCK_OTP}) and a new password.`}>
+    <AuthShell title="Reset password" subtitle={`Enter the code (demo: "123456" ) and a new password.`}>
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="flex justify-center">
           <InputOTP maxLength={6} value={code} onChange={setCode}>

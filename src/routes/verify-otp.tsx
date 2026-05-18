@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AuthShell } from "@/components/AuthShell";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { login, MOCK_OTP, verifyOtp } from "@/lib/auth";
+// import { login, MOCK_OTP, verifyOtp } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/verify-otp")({
@@ -20,15 +20,15 @@ function VerifyOtpPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      verifyOtp(code);
+      // verifyOtp(code);
       const email = sessionStorage.getItem("pending_email");
       const password = sessionStorage.getItem("pending_password");
       if (email && password) {
-        const s = login(email, password);
+        // const s = login(email, password);
         sessionStorage.removeItem("pending_email");
         sessionStorage.removeItem("pending_password");
         toast.success("Verified! Welcome.");
-        navigate({ to: s.role === "admin" ? "/admin" : "/dashboard" });
+        //  navigate({ to: s.role === "admin" ? "/admin" : "/dashboard" });
       } else {
         toast.success("OTP verified.");
         navigate({ to: "/login" });
@@ -39,7 +39,7 @@ function VerifyOtpPage() {
   };
 
   return (
-    <AuthShell title="Verify it's you" subtitle={`Enter the 6-digit code (demo: ${MOCK_OTP}).`}>
+    <AuthShell title="Verify it's you" subtitle={`Enter the 6-digit code (demo: "123456").`}>
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="flex justify-center">
           <InputOTP maxLength={6} value={code} onChange={setCode}>

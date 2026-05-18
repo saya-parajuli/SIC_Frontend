@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { BootstrapProvider, useBootstrap } from "../contexts/bootstrapContext";
 
 function NotFoundComponent() {
   return (
@@ -114,8 +115,25 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <BootstrapProvider>
+        <AppShell />
+      </BootstrapProvider>
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
+}
+
+
+function AppShell() {
+  const { status } = useBootstrap();
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  return <Outlet />;
 }

@@ -1,16 +1,41 @@
 import { useEffect, useState } from "react";
-import { getSession, type Session } from "@/lib/auth";
 
-export function useSession(): Session | null {
-  const [s, setS] = useState<Session | null>(() => getSession());
+import { storage } from "@/lib/storage";
+
+import { User } from "@/types/auth";
+
+export interface SessionUser extends User {
+  role?: string;
+}
+
+export function getSession() {
+  const token = storage.get<string>(
+    storage.KEYS.ACCESS_TOKEN
+  );
+
+  const user =
+    storage.get<SessionUser>(
+      storage.KEYS.USER
+    );
+
+  if (!token || !user) {
+    return null;
+  }
+
+  return {
+    token,
+    ...user,
+  };
+}
+
+export function useSession() {
+  const [session, setSession] = useState(
+    getSession()
+  );
+
   useEffect(() => {
-    const sync = () => setS(getSession());
-    window.addEventListener("auth-change", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("auth-change", sync);
-      window.removeEventListener("storage", sync);
-    };
+    setSession(getSession());
   }, []);
-  return s;
+
+  return session;
 }
