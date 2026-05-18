@@ -86,6 +86,9 @@ export function SiteLayout({
                 "/dashboard",
                 "Dashboard"
               )}
+
+            {session?.role === "admin" &&
+              navLink("/admin", "Admin")}
           </nav>
 
           {/* AUTH ACTIONS */}
@@ -98,9 +101,18 @@ export function SiteLayout({
                   size="sm"
                 >
                   <Link
-                    to= "/dashboard"
+                    to={
+                      session.role === "admin"
+                        ? "/admin"
+                        : "/dashboard"
+                    }
                   >
+                    {session.role ===
+                    "admin" ? (
+                      <Shield className="mr-1 h-4 w-4" />
+                    ) : (
                       <LayoutDashboard className="mr-1 h-4 w-4" />
+                    )}
 
                     {session.first_name ??
                       session.email}

@@ -30,6 +30,7 @@ function Dashboard() {
 
   useEffect(() => {
     if (session === null) navigate({ to: "/login" });
+    else if (session.role === "admin") navigate({ to: "/admin" });
   }, [session, navigate]);
 
   const userId = session?.userId ?? "u1";
@@ -38,7 +39,7 @@ function Dashboard() {
   const hourly = useMemo(() => getHourlyForecast(userId), [userId]);
   const notifications = useMemo(() => getNotifications(userId), [userId]);
 
-  if (!session ) return null;
+  if (!session || session.role === "admin") return null;
 
   const week = daily.slice(-7);
   const month = daily.slice(-30);
