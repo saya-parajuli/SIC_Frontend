@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "@/hooks/use-session";
 
-import { storage } from "@/lib/storage";
+import { useLogout } from "@/hooks/use-auth";
 
 export function SiteLayout({
   children,
@@ -30,16 +30,10 @@ export function SiteLayout({
     select: (r) => r.location.pathname,
   });
 
-  const handleLogout = () => {
-    storage.remove(
-      storage.KEYS.ACCESS_TOKEN
-    );
+  const { logout } = useLogout();
 
-    storage.remove(
-      storage.KEYS.REFRESH_TOKEN
-    );
-
-    storage.remove(storage.KEYS.USER);
+  const handleLogout = async () => {
+    await logout();
 
     navigate({ to: "/login" });
   };
@@ -228,6 +222,28 @@ export function SiteLayout({
             </h4>
 
             <ul className="space-y-1 text-sm text-muted-foreground">
+              {session ? (
+                <>
+                  <li>
+                    <a
+                    style={{cursor: "pointer"}}
+                      className="hover:text-primary"
+                    >
+                      Profile
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                    style={{cursor: "pointer"}}
+                      onClick={handleLogout}
+                      className="hover:text-primary"
+                    >
+                      Logout
+                    </a>
+                  </li>
+                </>
+              ) : (
+                <>
               <li>
                 <Link
                   to="/login"
@@ -254,6 +270,8 @@ export function SiteLayout({
                   Forgot password
                 </Link>
               </li>
+                </>
+              )}
             </ul>
           </div>
         </div>

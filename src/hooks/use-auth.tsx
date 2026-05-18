@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { registerUser, loginUser } from "@/api/auth";
+import { registerUser, loginUser, logoutUser } from "@/api/auth";
 import { storage } from "@/lib/storage";
 import {
   RegisterPayload,
@@ -178,5 +178,53 @@ export function useLogin() {
     login,
     loading,
     errors,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                     LOGOUT                                  */
+/* -------------------------------------------------------------------------- */
+
+export function useLogout() {
+  const [loading, setLoading] =
+    useState(false);
+
+  const logout = async () => {
+    try {
+      setLoading(true);
+
+      const refresh =
+        storage.get<string>(
+          storage.KEYS.REFRESH_TOKEN
+        );
+
+      // Call backend logout only if refresh exists
+      if (refresh) {
+        await logoutUser(refresh);
+      }
+    } catch (error) {
+      console.error(
+        "Logout failed:",
+        error
+      );
+    } finally {
+      // ALWAYS clear local auth
+      storage.remove(
+        storage.KEYS.ACCESS_TOKEN
+      );
+
+      storage.remove(
+        storage.KEYS.REFRESH_TOKEN
+      );
+
+      storage.remove(storage.KEYS.USER);
+
+      setLoading(false);
+    }
+  };
+
+  return {
+    logout,
+    loading,
   };
 }

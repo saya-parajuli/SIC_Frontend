@@ -1,5 +1,15 @@
-import { Link } from "@tanstack/react-router";
+import {
+  Link,
+  useNavigate,
+} from "@tanstack/react-router";
+
+import {
+  useEffect,
+} from "react";
+
 import { Bolt } from "lucide-react";
+
+import { useSession } from "@/hooks/use-session";
 
 export function AuthShell({ title, subtitle, children, footer }: {
   title: string;
@@ -7,6 +17,18 @@ export function AuthShell({ title, subtitle, children, footer }: {
   children: React.ReactNode;
   footer?: React.ReactNode;
 }) {
+  const session = useSession();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!session) return;
+
+    navigate({
+      to: "/dashboard",
+    });
+  }, [session, navigate]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background px-4 py-12">
       <div className="w-full max-w-md">

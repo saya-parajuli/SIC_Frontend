@@ -32,3 +32,8 @@ export interface RegisterResponse {
 export type ValidationErrors<T> = Partial<
   Record<keyof T, string>
 >;
+
+export interface LogoutResponse {
+  detail?: string;
+  message?: string;
+}

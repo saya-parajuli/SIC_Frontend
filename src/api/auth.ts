@@ -5,6 +5,7 @@ import {
   RegisterResponse,
   LoginPayload,
   LoginResponse,
+  LogoutResponse,
 } from "@/types/auth";
 
 export async function registerUser(
@@ -25,6 +26,21 @@ export async function loginUser(
     "/auth/login/",
     payload
   );
+
+  return response.data;
+}
+
+
+export async function logoutUser(
+  refresh: string
+) {
+  const response =
+    await client.post<LogoutResponse>(
+      "/auth/logout/",
+      {
+        refresh,
+      }
+    );
 
   return response.data;
 }

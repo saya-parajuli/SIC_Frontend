@@ -5,7 +5,7 @@ import { storage } from "@/lib/storage";
 import { User } from "@/types/auth";
 
 export interface SessionUser extends User {
-  role?: string;
+  userId?: string;
 }
 
 export function getSession() {
