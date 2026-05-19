@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
-import { registerUser, loginUser, logoutUser } from "@/api/auth";
+import { registerUser, loginUser, logoutUser, forgotPassword, resetPassword, } from "@/api/auth";
 import { storage } from "@/lib/storage";
 import {
   RegisterPayload,
   LoginPayload,
   ValidationErrors,
+  ResetPasswordPayload
 } from "@/types/auth";
 
 
@@ -225,6 +226,62 @@ export function useLogout() {
 
   return {
     logout,
+    loading,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 FORGOT PASSWORD                                */
+/* -------------------------------------------------------------------------- */
+
+export function useForgotPassword() {
+  const [loading, setLoading] =
+    useState(false);
+
+  const submitForgotPassword =
+    async (email: string) => {
+      try {
+        setLoading(true);
+
+        return await forgotPassword({
+          email,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  return {
+    submitForgotPassword,
+    loading,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 RESET PASSWORD                                */
+/* -------------------------------------------------------------------------- */
+
+export function useResetPassword() {
+  const [loading, setLoading] =
+    useState(false);
+
+  const submitResetPassword =
+    async (
+      payload: ResetPasswordPayload
+    ) => {
+      try {
+        setLoading(true);
+
+        return await resetPassword(
+          payload
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  return {
+    submitResetPassword,
     loading,
   };
 }

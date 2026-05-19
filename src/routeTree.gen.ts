@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -19,15 +18,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResetPasswordReset_tokenRouteImport } from './routes/reset-password.$reset_token'
 
 const VerifyOtpRoute = VerifyOtpRouteImport.update({
   id: '/verify-otp',
   path: '/verify-otp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -70,6 +65,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordReset_tokenRoute =
+  ResetPasswordReset_tokenRouteImport.update({
+    id: '/reset-password/$reset_token',
+    path: '/reset-password/$reset_token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,8 +81,8 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/reset-password/$reset_token': typeof ResetPasswordReset_tokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,8 +93,8 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/reset-password/$reset_token': typeof ResetPasswordReset_tokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,8 +106,8 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/reset-password/$reset_token': typeof ResetPasswordReset_tokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,8 +120,8 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/register'
-    | '/reset-password'
     | '/verify-otp'
+    | '/reset-password/$reset_token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,8 +132,8 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/register'
-    | '/reset-password'
     | '/verify-otp'
+    | '/reset-password/$reset_token'
   id:
     | '__root__'
     | '/'
@@ -143,8 +144,8 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/register'
-    | '/reset-password'
     | '/verify-otp'
+    | '/reset-password/$reset_token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,8 +157,8 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyOtpRoute: typeof VerifyOtpRoute
+  ResetPasswordReset_tokenRoute: typeof ResetPasswordReset_tokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -167,13 +168,6 @@ declare module '@tanstack/react-router' {
       path: '/verify-otp'
       fullPath: '/verify-otp'
       preLoaderRoute: typeof VerifyOtpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -232,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password/$reset_token': {
+      id: '/reset-password/$reset_token'
+      path: '/reset-password/$reset_token'
+      fullPath: '/reset-password/$reset_token'
+      preLoaderRoute: typeof ResetPasswordReset_tokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -244,8 +245,8 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
   VerifyOtpRoute: VerifyOtpRoute,
+  ResetPasswordReset_tokenRoute: ResetPasswordReset_tokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -38,3 +38,30 @@ export interface LogoutResponse {
   detail?: string;
   message?: string;
 }
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message?: string;
+  detail?: string;
+}
+
+export interface ResetPasswordPayload {
+  reset_token: string;
+  otp: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface ResetPasswordResponse {
+  message?: string;
+  detail?: string;
+}
+
+export interface ResetPasswordErrors {
+  otp?: string;
+  new_password?: string;
+  confirm_password?: string;
+}

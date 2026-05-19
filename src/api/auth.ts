@@ -6,6 +6,10 @@ import {
   LoginPayload,
   LoginResponse,
   LogoutResponse,
+  ForgotPasswordPayload,
+  ForgotPasswordResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
 } from "@/types/auth";
 
 export async function registerUser(
@@ -40,6 +44,30 @@ export async function logoutUser(
       {
         refresh,
       }
+    );
+
+  return response.data;
+}
+
+export async function forgotPassword(
+  payload: ForgotPasswordPayload
+) {
+  const response =
+    await client.post<ForgotPasswordResponse>(
+      "/auth/forgot-password/",
+      payload
+    );
+
+  return response.data;
+}
+
+export async function resetPassword(
+  payload: ResetPasswordPayload
+) {
+  const response =
+    await client.post<ResetPasswordResponse>(
+      "/auth/reset-password/",
+      payload
     );
 
   return response.data;

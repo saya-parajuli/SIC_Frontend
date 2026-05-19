@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useForgotPassword } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Forgot password — SmartLoad DR" }] }),
@@ -13,27 +14,85 @@ export const Route = createFileRoute("/forgot-password")({
 
 function ForgotPage() {
   const navigate = useNavigate();
+  const {
+    submitForgotPassword,
+    loading,
+  } = useForgotPassword();
   const [email, setEmail] = useState("");
 
-  const onSubmit = (e: React.FormEvent) => {
+   const onSubmit = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
-    toast.success("Reset code sent (demo: 123456).");
-    sessionStorage.setItem("pending_email", email);
-    navigate({ to: "/reset-password" });
+
+    try {
+      await submitForgotPassword(
+        email
+      );
+
+      toast.success(
+        "Reset instructions sent to your email."
+      );
+
+      navigate({
+        to: "/",
+      });
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.detail ||
+          "Failed to send reset email"
+      );
+    }
   };
 
   return (
     <AuthShell
       title="Forgot password"
-      subtitle="We'll send a one-time code to reset your password."
-      footer={<>Remembered it? <Link to="/login" className="text-primary hover:underline">Login</Link></>}
+      subtitle="Enter your email address and we'll send reset instructions."
+      footer={
+        <>
+          Remembered it?{" "}
+          <Link
+            to="/login"
+            className="text-primary hover:underline"
+          >
+            Login
+          </Link>
+        </>
+      }
     >
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-4"
+      >
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Label htmlFor="email">
+            Email
+          </Label>
+
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
+            placeholder="batuli@example.com"
+          />
         </div>
-        <Button type="submit" className="w-full">Send reset code</Button>
+
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={loading}
+        >
+          {loading
+            ? "Sending..."
+            : "Send reset link"}
+        </Button>
       </form>
     </AuthShell>
   );
