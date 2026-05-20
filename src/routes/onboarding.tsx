@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Home as HomeIcon, Cpu, CheckCircle2, ArrowRight, Bolt } from "lucide-react";
 import { toast } from "sonner";
-import { addHome, addMeter, getHomes, getMeters, isValidMac, normalizeMac } from "@/lib/meters";
+import { useProperty } from "@/hooks/use-properties";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Setup — SmartLoad DR" }] }),
@@ -21,18 +21,27 @@ function Onboarding() {
   const session = useSession();
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [homeId, setHomeId] = useState<string | null>(null);
+  const [homeId, setHomeId] = useState<number | null>(null);
 
   // Home form
   const [name, setName] = useState("Main residence");
-  const [address, setAddress] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+const [city, setCity] = useState("");
+const [country, setCountry] = useState("Nepal");
   const [tariff, setTariff] = useState<"flat" | "tou" | "tiered">("tou");
+  const [propertyType, setPropertyType] = useState<"residential" | "commercial" | "industrial" | "apartment" >("residential");
   const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
 
   // Meter form
   const [macId, setMacId] = useState("");
   const [label, setLabel] = useState("Main meter");
-  const [type, setType] = useState<"main" | "solar" | "sub" | "ev">("main");
+  const [type, setType] = useState<"main" | "solar" | "sub" | "ev" | "industrial">("main");
+
+  // Errors handling
+  const [homeErrors, setHomeErrors] = useState<any>({});
+const [meterErrors, setMeterErrors] = useState<any>({});
+
+const { addProperty, addMeter, onboardingStatus, loading } = useProperty();
 
   useEffect(() => {
     if (session === null) navigate({ to: "/login" });
@@ -46,29 +55,114 @@ function Onboarding() {
     } */
   }, [session, navigate]);
 
+  useEffect(() => {
+  async function checkStatus() {
+    try {
+      const status = await onboardingStatus();
+
+      // User already completed onboarding
+      if (status.step === 3) {
+        navigate({ to: "/dashboard" });
+        return;
+      }
+
+      // User already created property
+      if (status.step >= 2 && status.property) {
+        setHomeId(status.property.id);
+
+        // Optional prefill UI
+        setName(status.property.name);
+        setAddressLine1(status.property.address);
+        setCity(status.property.city);
+
+        setStep(2);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  if (session) {
+    checkStatus();
+  }
+}, [session, navigate, onboardingStatus]);
+
   if (!session) return null;
 
-  const submitHome = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !address.trim()) { toast.error("Fill home name and address"); return; }
-    const h = addHome(session.userId, { name: name.trim(), address: address.trim(), timezone, tariff });
-    setHomeId(h.id);
-    toast.success(`Home "${h.name}" added`);
-    setStep(2);
-  };
+  const submitHome = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const submitMeter = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!homeId) return;
-    if (!isValidMac(macId)) { toast.error("MAC ID must look like AA:BB:CC:DD:EE:FF"); return; }
-    try {
-      addMeter(session.userId, { homeId, macId: normalizeMac(macId), label: label.trim() || "Meter", type });
-      toast.success("Meter linked");
-      setStep(3);
-    } catch (err) {
-      toast.error((err as Error).message);
+  try {
+    setHomeErrors({});
+
+    const property = await addProperty({
+      name,
+      address_line1: addressLine1,
+      city,
+      country,
+
+      timezone,
+
+      tariff_plan: tariff,
+
+      property_type: propertyType,
+    });
+
+    setHomeId(property.id);
+
+    toast.success("Home added successfully");
+
+    setStep(2);
+  } catch (err: any) {
+    if (typeof err === "object") {
+      setHomeErrors(err);
+      return;
     }
-  };
+
+    toast.error(
+      err?.response?.data?.detail ||
+      "Failed to create property"
+    );
+  }
+};
+
+  const submitMeter = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+
+    if (!homeId) {
+      toast.error("Property not found. Please create home first.");
+      return;
+    }
+
+    setMeterErrors({});
+
+    await addMeter({
+      property: homeId,
+
+      mac_address: macId,
+
+      label,
+
+      meter_type: type,
+    });
+
+    toast.success("Meter linked successfully");
+
+    setStep(3);
+  } catch (err: any) {
+    if (typeof err === "object") {
+      setMeterErrors(err);
+      return;
+    }
+
+    toast.error(
+      err?.response?.data?.detail ||
+      "Failed to link meter"
+    );
+  }
+};
 
   return (
     <SiteLayout>
@@ -96,9 +190,49 @@ function Onboarding() {
                 <Field label="Home name">
                   <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Main residence" />
                 </Field>
-                <Field label="Address">
-                  <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="221B Baker St, London" />
+                <Field label="Property type">
+                  <Select value={propertyType} onValueChange={(v) => setPropertyType(v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="residential">Residential</SelectItem>
+                      <SelectItem value="commercial">Commercial</SelectItem>
+                      <SelectItem value="industrial">Industrial</SelectItem>
+                      <SelectItem value="apartment">Apartment</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
+                <Field label="Address">
+                <Input
+                  value={addressLine1}
+                  onChange={(e) => setAddressLine1(e.target.value)}
+                  placeholder="Pokhara-8, Lamachaur"
+                />
+
+                {homeErrors.address_line1 && (
+                  <p className="text-xs text-red-500">
+                    {homeErrors.address_line1}
+                  </p>
+                )}
+              </Field>
+              <Field label="City">
+              <Input
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Pokhara"
+              />
+
+              {homeErrors.city && (
+                <p className="text-xs text-red-500">
+                  {homeErrors.city}
+                </p>
+              )}
+            </Field>
+            <Field label="Country">
+            <Input
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+          </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Timezone">
                     <Input value={timezone} onChange={(e) => setTimezone(e.target.value)} />
@@ -114,7 +248,14 @@ function Onboarding() {
                     </Select>
                   </Field>
                 </div>
-                <Button type="submit" className="mt-2 w-full">Continue <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button
+                type="submit"
+                className="mt-2 w-full"
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Continue"}
+              <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
               </form>
             </CardContent>
           </Card>
@@ -138,6 +279,11 @@ function Onboarding() {
                     className="font-mono uppercase tracking-wider"
                     maxLength={17}
                   />
+                  {meterErrors.mac_address && (
+                    <p className="text-xs text-red-500">
+                      {meterErrors.mac_address}
+                    </p>
+                  )}
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Label">
@@ -151,11 +297,18 @@ function Onboarding() {
                         <SelectItem value="solar">Solar export</SelectItem>
                         <SelectItem value="sub">Sub-circuit</SelectItem>
                         <SelectItem value="ev">EV charger</SelectItem>
+                        <SelectItem value="industrial">Industrial</SelectItem>
                       </SelectContent>
                     </Select>
                   </Field>
                 </div>
-                <Button type="submit" className="mt-2 w-full">Link meter <ArrowRight className="ml-1 h-4 w-4" /></Button>
+                <Button
+                  type="submit"
+                  className="mt-2 w-full"
+                  disabled={loading}
+                >
+                  {loading ? "Linking..." : "Link meter"}
+                <ArrowRight className="ml-1 h-4 w-4" /></Button>
                 <button
                   type="button"
                   onClick={() => { setMacId("AA:BB:CC:11:22:33"); }}
