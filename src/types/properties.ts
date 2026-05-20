@@ -2,6 +2,36 @@ export type TariffPlan = "flat" | "tou" | "tiered";
 
 export type MeterType = "main" | "solar" | "sub" | "ev" | "industrial";
 
+export interface Property {
+  id: number;
+  name: string;
+  property_type: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  district?: string;
+  province?: string;
+  country?: string;
+  postal_code?: string;
+  timezone: string;
+  tariff_plan: string;
+}
+
+export interface SmartMeter {
+  id: number;
+  property: number;
+  property_name: string;
+  mac_address: string;
+  serial_no?: string;
+  device_model?: string;
+  label: string;
+  meter_type: string;
+  phase?: string;
+  rated_capacity_kw?: number;
+  is_active: boolean;
+  is_verified: boolean;
+}
+
 export interface PropertyPayload {
   name: string;
   property_type?: string;

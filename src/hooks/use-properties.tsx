@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
+   getProperties,
+  getMeters,
   createProperty,
   createSmartMeter,
   getOnboardingStatus,
 } from "@/api/properties";
 
 import type {
+  Property,
+  SmartMeter,
   PropertyPayload,
   SmartMeterPayload,
   PropertyValidationErrors,
@@ -82,5 +86,41 @@ export function useProperty() {
     addProperty,
     addMeter,
     onboardingStatus,
+  };
+}
+
+
+
+
+export function useProperties() {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [meters, setMeters] = useState<SmartMeter[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    try {
+      setLoading(true);
+
+      const [props, mets] = await Promise.all([
+        getProperties(),
+        getMeters(),
+      ]);
+
+      setProperties(props);
+      setMeters(mets);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  return {
+    properties,
+    meters,
+    loading,
+    refresh,
   };
 }

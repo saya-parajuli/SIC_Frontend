@@ -14,8 +14,14 @@ import {
 import { Plus, Cpu, Home as HomeIcon, Trash2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import {
-  addHome, addMeter, isValidMac, normalizeMac, removeHome, removeMeter, useMeterStore,
-} from "@/lib/meters";
+  createProperty,
+  createSmartMeter,
+  deleteProperty,
+  deleteMeter,
+} from "@/api/properties";
+
+import { useProperties } from "@/hooks/use-properties";
+import { normalizeMac, isValidMac } from "@/lib/meters";
 
 export const Route = createFileRoute("/meters")({
   head: () => ({ meta: [{ title: "Meters — SmartLoad DR" }] }),
@@ -25,12 +31,27 @@ export const Route = createFileRoute("/meters")({
 function MetersPage() {
   const session = useSession();
   const navigate = useNavigate();
-  const store = useMeterStore(session?.userId);
+  const {
+  properties,
+  meters,
+  loading,
+  refresh,
+} = useProperties();
 
   useEffect(() => {
     if (session === null) navigate({ to: "/login" });
     else if (session?.role === "admin") navigate({ to: "/admin" });
   }, [session, navigate]);
+
+  if (loading) {
+  return (
+    <SiteLayout>
+      <div className="p-10 text-center">
+        Loading...
+      </div>
+    </SiteLayout>
+  );
+}
 
   if (!session || session.role === "admin") return null;
 
@@ -43,12 +64,12 @@ function MetersPage() {
             <p className="text-sm text-muted-foreground">Manage your properties and the smart meters linked to them.</p>
           </div>
           <div className="flex gap-2">
-            <AddHomeDialog userId={session.userId} />
-            {store.homes.length > 0 && <AddMeterDialog userId={session.userId} homes={store.homes} />}
+            <AddHomeDialog onSuccess={refresh} />
+            {properties.length > 0 && <AddMeterDialog homes={properties} onSuccess={refresh} />}
           </div>
         </div>
 
-        {store.homes.length === 0 ? (
+        {properties.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center gap-3 p-12 text-center">
               <HomeIcon className="h-10 w-10 text-muted-foreground" />
@@ -61,8 +82,8 @@ function MetersPage() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {store.homes.map((h) => {
-              const meters = store.meters.filter((m) => m.homeId === h.id);
+            {properties.map((h) => {
+              // const meters = store.meters.filter((m) => m.homeId === h.id);
               return (
                 <Card key={h.id}>
                   <CardHeader className="flex flex-row items-start justify-between gap-3">
@@ -71,12 +92,20 @@ function MetersPage() {
                         <HomeIcon className="h-5 w-5 text-primary" /> {h.name}
                       </CardTitle>
                       <CardDescription>
-                        {h.address} · <Badge variant="secondary" className="ml-1 align-middle">{h.tariff.toUpperCase()}</Badge> · {h.timezone}
+                        {h.address_line1} · <Badge variant="secondary" className="ml-1 align-middle">{h.tariff_plan.toUpperCase()}</Badge> · {h.timezone}
                       </CardDescription>
                     </div>
                     <Button
                       variant="ghost" size="sm"
-                      onClick={() => { removeHome(session.userId, h.id); toast.success("Home removed"); }}
+                      onClick={async () => {
+                        try {
+                          await deleteProperty(h.id);
+                          toast.success("Home removed");
+                          refresh();
+                        } catch {
+                          toast.error("Failed to remove home");
+                        }
+                      }}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -95,14 +124,22 @@ function MetersPage() {
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
                                   <p className="truncate text-sm font-medium">{m.label}</p>
-                                  <Badge variant="outline" className="text-[10px]">{m.type}</Badge>
+                                  <Badge variant="outline" className="text-[10px]">{m.meter_type}</Badge>
                                 </div>
-                                <p className="font-mono text-[11px] text-muted-foreground">{m.macId}</p>
+                                <p className="font-mono text-[11px] text-muted-foreground">{m.mac_address}</p>
                               </div>
                             </div>
                             <Button
                               variant="ghost" size="sm"
-                              onClick={() => { removeMeter(session.userId, m.id); toast.success("Meter removed"); }}
+                              onClick={async () => {
+                                  try {
+                                    await deleteMeter(m.id);
+                                    toast.success("Meter removed");
+                                    refresh();
+                                  } catch {
+                                    toast.error("Failed to remove meter");
+                                  }
+                                }}
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
@@ -121,19 +158,47 @@ function MetersPage() {
   );
 }
 
-function AddHomeDialog({ userId }: { userId: string }) {
+function AddHomeDialog({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [tariff, setTariff] = useState<"flat" | "tou" | "tiered">("tou");
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
-  const submit = () => {
-    if (!name.trim() || !address.trim()) { toast.error("Name and address required"); return; }
-    addHome(userId, { name: name.trim(), address: address.trim(), timezone: tz, tariff });
+const submit = async () => {
+  if (!name.trim() || !address.trim()) {
+    toast.error("Name and address required");
+    return;
+  }
+
+  try {
+    await createProperty({
+      name: name.trim(),
+      property_type: "residential",
+      address_line1: address.trim(),
+      city: "Unknown",
+      timezone: tz,
+      tariff_plan: tariff,
+    });
+
     toast.success("Home added");
-    setOpen(false); setName(""); setAddress("");
-  };
+
+    setOpen(false);
+    setName("");
+    setAddress("");
+
+    onSuccess?.();
+  } catch (err: any) {
+    toast.error(
+      err?.response?.data?.detail ||
+      "Failed to create property"
+    );
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -174,22 +239,54 @@ function AddHomeDialog({ userId }: { userId: string }) {
   );
 }
 
-function AddMeterDialog({ userId, homes }: { userId: string; homes: ReturnType<typeof useMeterStore>["homes"] }) {
+function AddMeterDialog({
+  homes,
+  onSuccess,
+}: {
+  homes: any[];
+  onSuccess?: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const [homeId, setHomeId] = useState(homes[0]?.id ?? "");
   const [macId, setMacId] = useState("");
   const [label, setLabel] = useState("");
   const [type, setType] = useState<"main" | "solar" | "sub" | "ev">("main");
 
-  const submit = () => {
-    if (!homeId) { toast.error("Pick a home"); return; }
-    if (!isValidMac(macId)) { toast.error("MAC ID must look like AA:BB:CC:DD:EE:FF"); return; }
-    try {
-      addMeter(userId, { homeId, macId: normalizeMac(macId), label: label.trim() || "Meter", type });
-      toast.success("Meter linked");
-      setOpen(false); setMacId(""); setLabel("");
-    } catch (e) { toast.error((e as Error).message); }
-  };
+const submit = async () => {
+  if (!homeId) {
+    toast.error("Pick a home");
+    return;
+  }
+
+  if (!isValidMac(macId)) {
+    toast.error("MAC ID must look like AA:BB:CC:DD:EE:FF");
+    return;
+  }
+
+  try {
+    await createSmartMeter({
+      property: Number(homeId),
+      mac_address: normalizeMac(macId),
+      label: label.trim() || "Meter",
+      meter_type: type,
+    });
+
+    toast.success("Meter linked");
+
+    setOpen(false);
+    setMacId("");
+    setLabel("");
+
+    onSuccess?.();
+  } catch (err: any) {
+    console.log(err.response?.data);
+
+    toast.error(
+      err?.response?.data?.detail ||
+      "Failed to link meter"
+    );
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
