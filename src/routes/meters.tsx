@@ -83,74 +83,75 @@ function MetersPage() {
         ) : (
           <div className="grid gap-4">
             {properties.map((h) => {
-              // const meters = store.meters.filter((m) => m.homeId === h.id);
-              return (
-                <Card key={h.id}>
-                  <CardHeader className="flex flex-row items-start justify-between gap-3">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <HomeIcon className="h-5 w-5 text-primary" /> {h.name}
-                      </CardTitle>
-                      <CardDescription>
-                        {h.address_line1} · <Badge variant="secondary" className="ml-1 align-middle">{h.tariff_plan.toUpperCase()}</Badge> · {h.timezone}
-                      </CardDescription>
+  const propertyMeters = meters.filter((m) => m.property === h.id); // ← filter here
+
+  return (
+    <Card key={h.id}>
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
+        <div>
+          <CardTitle className="flex items-center gap-2">
+            <HomeIcon className="h-5 w-5 text-primary" /> {h.name}
+          </CardTitle>
+          <CardDescription>
+            {h.address_line1} · <Badge variant="secondary" className="ml-1 align-middle">{h.tariff_plan.toUpperCase()}</Badge> · {h.timezone}
+          </CardDescription>
+        </div>
+        <Button
+          variant="ghost" size="sm"
+          onClick={async () => {
+            try {
+              await deleteProperty(h.id);
+              toast.success("Home removed");
+              refresh();
+            } catch {
+              toast.error("Failed to remove home");
+            }
+          }}
+        >
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {propertyMeters.length === 0 ? (            // ← use propertyMeters
+          <p className="text-sm text-muted-foreground">No meters linked to this home yet.</p>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {propertyMeters.map((m) => (            // ← use propertyMeters
+              <div key={m.id} className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <Cpu className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium">{m.label}</p>
+                      <Badge variant="outline" className="text-[10px]">{m.meter_type}</Badge>
                     </div>
-                    <Button
-                      variant="ghost" size="sm"
-                      onClick={async () => {
-                        try {
-                          await deleteProperty(h.id);
-                          toast.success("Home removed");
-                          refresh();
-                        } catch {
-                          toast.error("Failed to remove home");
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </CardHeader>
-                  <CardContent>
-                    {meters.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No meters linked to this home yet.</p>
-                    ) : (
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {meters.map((m) => (
-                          <div key={m.id} className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-                                <Cpu className="h-4 w-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="truncate text-sm font-medium">{m.label}</p>
-                                  <Badge variant="outline" className="text-[10px]">{m.meter_type}</Badge>
-                                </div>
-                                <p className="font-mono text-[11px] text-muted-foreground">{m.mac_address}</p>
-                              </div>
-                            </div>
-                            <Button
-                              variant="ghost" size="sm"
-                              onClick={async () => {
-                                  try {
-                                    await deleteMeter(m.id);
-                                    toast.success("Meter removed");
-                                    refresh();
-                                  } catch {
-                                    toast.error("Failed to remove meter");
-                                  }
-                                }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    <p className="font-mono text-[11px] text-muted-foreground">{m.mac_address}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={async () => {
+                    try {
+                      await deleteMeter(m.id);
+                      toast.success("Meter removed");
+                      refresh();
+                    } catch {
+                      toast.error("Failed to remove meter");
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+})}
           </div>
         )}
       </div>
