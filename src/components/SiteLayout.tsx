@@ -81,14 +81,9 @@ export function SiteLayout({
 
             {navLink("/features", "Features")}
 
-            {session &&
-              navLink(
-                "/dashboard",
-                "Dashboard"
-              )}
-
-            {session?.role === "admin" &&
-              navLink("/admin", "Admin")}
+           {session && session.role !== "admin" && navLink("/dashboard", "Dashboard")}
+            {session && session.role !== "admin" && navLink("/meters", "Meters")}
+            {session?.role === "admin" && navLink("/admin", "Admin")}
           </nav>
 
           {/* AUTH ACTIONS */}
