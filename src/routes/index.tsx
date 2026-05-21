@@ -45,12 +45,6 @@ function HomePage() {
           <Button asChild size="lg"><Link to="/register">Get started</Link></Button>
           <Button asChild size="lg" variant="outline"><Link to="/login">Login</Link></Button>
         </div>
-
-        <div className="mx-auto mt-10 max-w-md rounded-lg border bg-muted/30 p-4 text-left text-xs">
-          <div className="mb-1 font-semibold">Demo accounts</div>
-          <div>User: <code>samsung@gmail.com</code> / <code>sic123</code></div>
-          <div>Admin: <code>admin@demo.io</code> / <code>admin123</code></div>
-        </div>
       </section>
 
       <section className="container mx-auto grid gap-4 px-4 pb-20 md:grid-cols-3">

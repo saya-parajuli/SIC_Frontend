@@ -83,7 +83,14 @@ export function SiteLayout({
 
            {session && session.role !== "admin" && navLink("/dashboard", "Dashboard")}
             {session && session.role !== "admin" && navLink("/meters", "Meters")}
-            {session?.role === "admin" && navLink("/admin", "Admin")}
+           {session?.role === "admin" && (
+  <a
+    href={`${import.meta.env.VITE_BACKEND_URL}/admin/dashboard/`}
+    className="text-sm font-medium hover:text-primary"
+  >
+    Admin
+  </a>
+)}
           </nav>
 
           {/* AUTH ACTIONS */}
@@ -91,28 +98,22 @@ export function SiteLayout({
             {session ? (
               <>
                 <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                >
-                  <Link
-                    to={
-                      session.role === "admin"
-                        ? "/admin"
-                        : "/dashboard"
-                    }
-                  >
-                    {session.role ===
-                    "admin" ? (
-                      <Shield className="mr-1 h-4 w-4" />
-                    ) : (
-                      <LayoutDashboard className="mr-1 h-4 w-4" />
-                    )}
-
-                    {session.first_name ??
-                      session.email}
-                  </Link>
-                </Button>
+  asChild
+  variant="ghost"
+  size="sm"
+>
+  {session.role === "admin" ? (
+    <a href={`${import.meta.env.VITE_BACKEND_URL}/admin/dashboard/`}>
+      <Shield className="mr-1 h-4 w-4" />
+      {session.first_name ?? session.email}
+    </a>
+  ) : (
+    <Link to="/dashboard">
+      <LayoutDashboard className="mr-1 h-4 w-4" />
+      {session.first_name ?? session.email}
+    </Link>
+  )}
+</Button>
 
                 <Button
                   variant="outline"
